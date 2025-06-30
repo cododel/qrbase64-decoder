@@ -24,27 +24,12 @@ export const DECODING_OPTIONS: DecodingOption[] = [
     icon: "🔢"
   },
   {
-    id: "rot13",
-    name: "ROT Cipher",
-    description: "Декодирование ROT шифра",
-    detailedDescription: "ROT шифр - простой шифр замены, где каждая буква сдвигается на заданное количество позиций в алфавите. ROT13 (сдвиг на 13) - самый популярный вариант, но вы можете настроить любой сдвиг от 1 до 25.",
-    icon: "🔄",
-    requiresSettings: true
-  },
-  {
     id: "caesar",
     name: "Caesar Cipher",
     description: "Декодирование шифра Цезаря",
     detailedDescription: "Шифр Цезаря - классический метод шифрования, где каждая буква сдвигается на определенное количество позиций в алфавите. Вы можете настроить величину сдвига от 1 до 25.",
     icon: "🏛️",
     requiresSettings: true
-  },
-  {
-    id: "reverse",
-    name: "Reverse",
-    description: "Обращение строки задом наперед",
-    detailedDescription: "Простое обращение строки - последний символ становится первым и наоборот. 'Hello' становится 'olleH'. Часто используется для простого сокрытия текста.",
-    icon: "↩️"
   },
   {
     id: "password-protected",
@@ -159,21 +144,7 @@ function decodeHex(text: string): DecodingResult {
   }
 }
 
-// ROT декодирование с настраиваемым сдвигом
-function decodeROT13(text: string, settings?: DecodingSettings): DecodingResult {
-  const shift = settings?.rotShift || 13; // По умолчанию ROT13
-  const decoded = text.replace(/[A-Za-z]/g, (char) => {
-    const start = char <= 'Z' ? 65 : 97;
-    return String.fromCharCode(((char.charCodeAt(0) - start + shift) % 26) + start);
-  });
-  
-  return {
-    success: true,
-    decodedText: decoded,
-    originalText: text,
-    method: "rot13"
-  };
-}
+
 
 // Caesar cipher декодирование с настраиваемым сдвигом
 function decodeCaesar(text: string, settings?: DecodingSettings): DecodingResult {
@@ -191,17 +162,7 @@ function decodeCaesar(text: string, settings?: DecodingSettings): DecodingResult
   };
 }
 
-// Обращение строки
-function decodeReverse(text: string): DecodingResult {
-  const decoded = text.split('').reverse().join('');
-  
-  return {
-    success: true,
-    decodedText: decoded,
-    originalText: text,
-    method: "reverse"
-  };
-}
+
 
 // Простое XOR шифрование с паролем
 function decodePasswordProtected(text: string, password: string): DecodingResult {
@@ -288,12 +249,8 @@ export function decodeContent(
       return decodeURL(text);
     case "hex":
       return decodeHex(text);
-    case "rot13":
-      return decodeROT13(text, settings);
     case "caesar":
       return decodeCaesar(text, settings);
-    case "reverse":
-      return decodeReverse(text);
     case "password-protected":
       return decodePasswordProtected(text, password || '');
     case "json":

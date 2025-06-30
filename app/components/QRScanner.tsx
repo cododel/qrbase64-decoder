@@ -42,7 +42,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
     showPreview: false,
     decodingMethod: "base64", // По умолчанию Base64
     decodingPassword: "",
-    decodingSettings: { caesarShift: 3, rotShift: 13 }, // Настройки по умолчанию
+    decodingSettings: { caesarShift: 3 }, // Настройки по умолчанию
     decodingResult: null,
   });
 
@@ -147,11 +147,13 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
     const video = videoRef.current;
     const context = canvas.getContext("2d");
 
-    if (context) {
+    if (context && video.videoWidth && video.videoHeight) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0);
       updateState({ showPreview: true });
+    } else {
+      console.warn("Video dimensions not available yet");
     }
   };
 
@@ -161,7 +163,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
       currentResult: null, 
       decodingResult: null,
       decodingPassword: "",
-      decodingSettings: { caesarShift: 3, rotShift: 13 }
+      decodingSettings: { caesarShift: 3 }
     });
   };
 
@@ -398,33 +400,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
                 </div>
               )}
 
-              {/* Settings for ROT Cipher */}
-              {state.decodingMethod === "rot13" && (
-                <div className="mt-2 space-y-2">
-                  <label className="block text-xs text-gray-400">
-                    ROT сдвиг (1-25):
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="range"
-                      min="1"
-                      max="25"
-                      value={state.decodingSettings.rotShift || 13}
-                      onChange={(e) => handleSettingsChange({
-                        ...state.decodingSettings,
-                        rotShift: parseInt(e.target.value)
-                      })}
-                      className="flex-1"
-                    />
-                    <span className="text-sm text-gray-300 w-8 text-center">
-                      {state.decodingSettings.rotShift || 13}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    ROT{state.decodingSettings.rotShift || 13}: A→{String.fromCharCode(65 + ((state.decodingSettings.rotShift || 13) % 26))}
-                  </div>
-                </div>
-              )}
+
             </div>
 
             {/* Original Content */}

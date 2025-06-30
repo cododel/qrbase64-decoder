@@ -33,12 +33,10 @@ export interface QRDetectorProps {
 }
 
 export type DecodingMethod = 
-  | "base64"
-  | "url"
+  | "base64" 
+  | "url" 
   | "hex" 
-  | "rot13"
   | "caesar"
-  | "reverse"
   | "password-protected"
   | "json"
   | "none";
@@ -63,6 +61,5 @@ export interface DecodingResult {
 
 export interface DecodingSettings {
   caesarShift?: number;
-  rotShift?: number;
   customPattern?: string;
 }
