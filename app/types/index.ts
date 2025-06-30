@@ -31,3 +31,30 @@ export interface QRDetectorProps {
   videoConstraints?: VideoConstraints;
   className?: string;
 }
+
+export type DecodingMethod = 
+  | "base64"
+  | "url"
+  | "hex" 
+  | "rot13"
+  | "caesar"
+  | "reverse"
+  | "password-protected"
+  | "json"
+  | "none";
+
+export interface DecodingOption {
+  id: DecodingMethod;
+  name: string;
+  description: string;
+  requiresPassword?: boolean;
+  icon?: string;
+}
+
+export interface DecodingResult {
+  success: boolean;
+  decodedText: string;
+  originalText: string;
+  method: DecodingMethod;
+  error?: string;
+}
