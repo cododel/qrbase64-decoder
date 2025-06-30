@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { BrowserQRCodeReader } from "@zxing/library";
 import type { QRScanResult } from "~/types";
-import { copyToClipboard, safeAtob, formatTimestamp } from "~/lib/helpers";
+import { copyToClipboard, safeAtob } from "~/lib/helpers";
 import { QR_SCANNER_CONFIG, ERROR_MESSAGES } from "~/lib/constants";
 
 interface QRScannerProps {
@@ -16,7 +16,7 @@ interface ScanState {
   devices: MediaDeviceInfo[];
   selectedDeviceId: string | null;
   error: string | null;
-  lastResult: QRScanResult | null;
+  currentResult: QRScanResult | null; // Only current result, no history
   showPreview: boolean;
 }
 
@@ -32,7 +32,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
     devices: [],
     selectedDeviceId: null,
     error: null,
-    lastResult: null,
+    currentResult: null,
     showPreview: false,
   });
 
@@ -89,11 +89,10 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
             const qrResult: QRScanResult = {
               text: result.getText(),
               rawData: new Uint8ClampedArray(),
-              timestamp: Date.now(),
               format: result.getBarcodeFormat()?.toString() || "QR_CODE",
             };
 
-            updateState({ lastResult: qrResult });
+            updateState({ currentResult: qrResult });
             onScan?.(qrResult);
           }
 
@@ -134,13 +133,13 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
   };
 
   const resetCamera = () => {
-    updateState({ showPreview: false, lastResult: null });
+    updateState({ showPreview: false, currentResult: null });
   };
 
   const handleCopyToClipboard = async () => {
-    if (state.lastResult) {
+    if (state.currentResult) {
       try {
-        const decodedText = safeAtob(state.lastResult.text);
+        const decodedText = safeAtob(state.currentResult.text);
         await copyToClipboard(decodedText);
       } catch (error) {
         onError?.(new Error("Failed to copy to clipboard"));
@@ -253,18 +252,18 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
 
       {/* Results Panel */}
       <div className="md:w-1/2 p-4 border border-gray-300 h-full">
-        {state.lastResult ? (
+        {state.currentResult ? (
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-lg mb-2">Scanned Content:</h3>
+              <h3 className="font-semibold text-lg mb-2">Decoded Content:</h3>
               <div className="bg-gray-50 p-3 rounded border font-mono text-sm whitespace-pre-wrap break-all">
-                {safeAtob(state.lastResult.text)}
+                {safeAtob(state.currentResult.text)}
               </div>
             </div>
             
             <div className="text-sm text-gray-600">
-              <p>Format: {state.lastResult.format}</p>
-              <p>Scanned: {formatTimestamp(state.lastResult.timestamp)}</p>
+              <p>Format: {state.currentResult.format}</p>
+              <p className="text-xs text-amber-600">⚠️ No data is stored or tracked</p>
             </div>
 
             <button 
@@ -276,7 +275,10 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
           </div>
         ) : (
           <div className="flex items-center justify-center h-32 text-gray-500">
-            {state.isScanning ? "Scanning for QR codes..." : "No QR code detected"}
+            <div className="text-center">
+              <p>{state.isScanning ? "Scanning for QR codes..." : "No QR code detected"}</p>
+              <p className="text-xs text-green-600 mt-2">🔒 Private scanning - no data saved</p>
+            </div>
           </div>
         )}
       </div>

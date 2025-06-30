@@ -1,17 +1,34 @@
-# Codebase Refactoring Summary
+# Private QR Code Scanner - Refactoring Summary
 
-This document outlines the comprehensive refactoring performed to improve the maintainability and functionality of the QR code scanning application.
+This document outlines the comprehensive refactoring performed to improve the maintainability and functionality of the QR code scanning application with a **privacy-first approach**.
 
 ## 🎯 Objectives
 
-1. **Replace outdated QR library** - Migrate from `jsQR` to modern `@zxing/library`
-2. **Improve code organization** - Extract reusable components and utilities
-3. **Enhance maintainability** - Better structure, naming, and separation of concerns
-4. **Modern React patterns** - Use hooks, TypeScript interfaces, and best practices
+1. **Privacy First** - No data tracking, logging, or history storage
+2. **Replace outdated QR library** - Migrate from `jsQR` to modern `@zxing/library`
+3. **Improve code organization** - Extract reusable components and utilities
+4. **Enhance maintainability** - Better structure, naming, and separation of concerns
+5. **Modern React patterns** - Use hooks, TypeScript interfaces, and best practices
 
 ## 📚 Key Changes
 
-### 1. QR Code Library Upgrade
+### 1. Privacy-First Design
+
+**🔒 ZERO Data Tracking:**
+- No scan history storage
+- No timestamp tracking
+- No logging of QR content
+- No analytics or telemetry
+- Only current scan result displayed
+- Base64 data automatically decoded for privacy
+
+**Privacy Features:**
+- Clear privacy indicators in UI
+- Data is never persisted
+- No external API calls
+- All processing happens locally
+
+### 2. QR Code Library Upgrade
 
 **Before:** `jsQR` (outdated, limited functionality)
 **After:** `@zxing/library` (modern, actively maintained, better accuracy)

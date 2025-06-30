@@ -38,9 +38,7 @@ export function safeAtob(str: string): string {
   }
 }
 
-export function formatTimestamp(timestamp: number): string {
-  return new Date(timestamp).toLocaleString();
-}
+
 
 export function debounce<T extends (...args: any[]) => any>(
   func: T,

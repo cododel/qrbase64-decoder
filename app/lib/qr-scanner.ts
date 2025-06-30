@@ -33,7 +33,6 @@ export class QRScanner {
             const qrResult: QRScanResult = {
               text: result.getText(),
               rawData: new Uint8ClampedArray(), // @zxing doesn't provide raw data directly
-              timestamp: Date.now(),
               format: result.getBarcodeFormat()?.toString() || "QR_CODE",
             };
             this.onScan?.(qrResult);

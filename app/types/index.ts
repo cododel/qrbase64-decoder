@@ -1,7 +1,6 @@
 export interface QRScanResult {
   text: string;
   rawData: Uint8ClampedArray;
-  timestamp: number;
   format: string;
 }
 
