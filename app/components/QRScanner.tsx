@@ -204,8 +204,8 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <span>Инициализация камеры...</span>
+          <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-300">Инициализация камеры...</span>
         </div>
       </div>
     );
@@ -214,10 +214,10 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
   if (state.error) {
     return (
       <div className={`flex flex-col items-center justify-center p-8 ${className}`}>
-        <div className="text-red-600 mb-4">Ошибка: {state.error}</div>
+        <div className="text-red-400 mb-4">Ошибка: {state.error}</div>
         <button 
           onClick={() => window.location.reload()} 
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Повторить
         </button>
@@ -228,7 +228,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
   return (
     <div className={`flex flex-col md:flex-row w-full h-full ${className}`}>
       {/* Camera View */}
-      <div className="flex flex-col items-center justify-center md:w-1/2 border border-gray-300 p-4">
+      <div className="flex flex-col items-center justify-center md:w-1/2 border border-gray-600 p-4 bg-gray-900">
         {state.showPreview ? (
           <canvas ref={canvasRef} className="w-full max-w-lg" />
         ) : (
@@ -244,13 +244,13 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
         <div className="flex flex-col gap-2 mt-4 w-full max-w-lg">
           {/* Device Selection */}
           <select
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-600 rounded bg-gray-800 text-white"
             value={state.selectedDeviceId || ""}
             onChange={(e) => handleDeviceChange(e.target.value)}
             disabled={state.isScanning}
           >
             {state.devices.map(device => (
-              <option key={device.deviceId} value={device.deviceId}>
+              <option key={device.deviceId} value={device.deviceId} className="bg-gray-800">
                 {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
               </option>
             ))}
@@ -261,14 +261,14 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
             {!state.isScanning ? (
               <button 
                 onClick={() => startScanning()}
-                className="flex-1 p-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                className="flex-1 p-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
               >
                 Начать сканирование
               </button>
             ) : (
               <button 
                 onClick={stopScanning}
-                className="flex-1 p-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                className="flex-1 p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
               >
                 Остановить
               </button>
@@ -277,7 +277,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
             {state.isScanning && !state.showPreview && (
               <button 
                 onClick={takeScreenshot}
-                className="flex-1 p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                className="flex-1 p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
                 Снимок
               </button>
@@ -286,7 +286,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
             {state.showPreview && (
               <button 
                 onClick={resetCamera}
-                className="flex-1 p-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                className="flex-1 p-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
               >
                 Сброс
               </button>
@@ -296,21 +296,21 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
       </div>
 
       {/* Results Panel */}
-      <div className="md:w-1/2 p-4 border border-gray-300 h-full">
+      <div className="md:w-1/2 p-4 border border-gray-600 h-full bg-gray-800">
         {state.currentResult ? (
           <div className="space-y-4">
             {/* Decoder Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Метод декодирования:
               </label>
               <select
                 value={state.decodingMethod}
                 onChange={(e) => handleDecodingMethodChange(e.target.value as DecodingMethod)}
-                className="w-full p-2 border border-gray-300 rounded text-sm"
+                className="w-full p-2 border border-gray-600 rounded text-sm bg-gray-700 text-white"
               >
                 {DECODING_OPTIONS.map(option => (
-                  <option key={option.id} value={option.id}>
+                  <option key={option.id} value={option.id} className="bg-gray-700">
                     {option.icon} {option.name}
                   </option>
                 ))}
@@ -324,7 +324,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
                     placeholder="Введите пароль для расшифровки"
                     value={state.decodingPassword}
                     onChange={(e) => handlePasswordChange(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded text-sm"
+                    className="w-full p-2 border border-gray-600 rounded text-sm bg-gray-700 text-white placeholder-gray-400"
                   />
                 </div>
               )}
@@ -332,19 +332,19 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
 
             {/* Original Content */}
             <div>
-              <h3 className="font-semibold text-sm text-gray-600 mb-1">Оригинальное содержимое:</h3>
-              <div className="bg-gray-100 p-2 rounded border font-mono text-xs break-all max-h-20 overflow-y-auto">
+              <h3 className="font-semibold text-sm text-gray-400 mb-1">Оригинальное содержимое:</h3>
+              <div className="bg-gray-700 p-2 rounded border border-gray-600 font-mono text-xs break-all max-h-20 overflow-y-auto text-gray-300">
                 {state.currentResult.text}
               </div>
             </div>
 
             {/* Decoded Content */}
             <div>
-              <h3 className="font-semibold text-lg mb-2 flex items-center">
+              <h3 className="font-semibold text-lg mb-2 flex items-center text-white">
                 Декодированное содержимое:
                 {state.decodingResult && (
                   <span className={`ml-2 text-xs px-2 py-1 rounded ${
-                    state.decodingResult.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    state.decodingResult.success ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
                   }`}>
                     {state.decodingResult.success ? '✓ Успешно' : '⚠ Ошибка'}
                   </span>
@@ -352,37 +352,35 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
               </h3>
               
               {state.decodingResult ? (
-                <div className="bg-gray-50 p-3 rounded border font-mono text-sm whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+                <div className="bg-gray-700 p-3 rounded border border-gray-600 font-mono text-sm whitespace-pre-wrap break-all max-h-40 overflow-y-auto text-gray-200">
                   {state.decodingResult.success ? 
                     state.decodingResult.decodedText : 
                     `Ошибка: ${state.decodingResult.error}`
                   }
                 </div>
               ) : (
-                <div className="bg-gray-50 p-3 rounded border text-gray-500 text-sm">
+                <div className="bg-gray-700 p-3 rounded border border-gray-600 text-gray-400 text-sm">
                   Выберите метод декодирования
                 </div>
               )}
             </div>
             
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-400">
               <p>Формат QR: {state.currentResult.format}</p>
-              <p className="text-xs text-amber-600">⚠️ Данные не сохраняются и не отслеживаются</p>
             </div>
 
             <button 
               onClick={handleCopyToClipboard}
               disabled={!state.decodingResult || !state.decodingResult.success}
-              className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
             >
               Копировать декодированный текст
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-32 text-gray-500">
+          <div className="flex items-center justify-center h-32 text-gray-400">
             <div className="text-center">
               <p>{state.isScanning ? "Сканирование QR кодов..." : "QR код не обнаружен"}</p>
-              <p className="text-xs text-green-600 mt-2">🔒 Приватное сканирование - данные не сохраняются</p>
             </div>
           </div>
         )}
