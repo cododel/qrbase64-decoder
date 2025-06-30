@@ -47,7 +47,9 @@ export interface DecodingOption {
   id: DecodingMethod;
   name: string;
   description: string;
+  detailedDescription?: string;
   requiresPassword?: boolean;
+  requiresSettings?: boolean;
   icon?: string;
 }
 
@@ -57,4 +59,10 @@ export interface DecodingResult {
   originalText: string;
   method: DecodingMethod;
   error?: string;
+}
+
+export interface DecodingSettings {
+  caesarShift?: number;
+  rotShift?: number;
+  customPattern?: string;
 }

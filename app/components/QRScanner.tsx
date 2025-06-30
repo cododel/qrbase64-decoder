@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { BrowserQRCodeReader } from "@zxing/library";
-import type { QRScanResult, DecodingMethod, DecodingResult } from "~/types";
+import type { QRScanResult, DecodingMethod, DecodingResult, DecodingSettings } from "~/types";
 import { copyToClipboard } from "~/lib/helpers";
 import { QR_SCANNER_CONFIG, ERROR_MESSAGES } from "~/lib/constants";
 import { decodeContent, detectEncodingType, DECODING_OPTIONS } from "~/lib/decoders";
+import { Tooltip } from "~/components/ui/Tooltip";
 
 interface QRScannerProps {
   onScan?: (result: QRScanResult) => void;
@@ -21,6 +22,7 @@ interface ScanState {
   showPreview: boolean;
   decodingMethod: DecodingMethod;
   decodingPassword: string;
+  decodingSettings: DecodingSettings;
   decodingResult: DecodingResult | null;
 }
 
@@ -40,6 +42,7 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
     showPreview: false,
     decodingMethod: "base64", // По умолчанию Base64
     decodingPassword: "",
+    decodingSettings: { caesarShift: 3, rotShift: 13 }, // Настройки по умолчанию
     decodingResult: null,
   });
 
@@ -101,7 +104,12 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
 
             // Автоматически определяем тип кодирования и декодируем
             const detectedMethod = detectEncodingType(qrResult.text);
-            const decodingResult = decodeContent(qrResult.text, detectedMethod);
+            const decodingResult = decodeContent(
+              qrResult.text, 
+              detectedMethod, 
+              undefined, 
+              state.decodingSettings
+            );
             
             updateState({ 
               currentResult: qrResult,
@@ -152,7 +160,8 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
       showPreview: false, 
       currentResult: null, 
       decodingResult: null,
-      decodingPassword: ""
+      decodingPassword: "",
+      decodingSettings: { caesarShift: 3, rotShift: 13 }
     });
   };
 
@@ -161,7 +170,8 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
       const decodingResult = decodeContent(
         state.currentResult.text, 
         method, 
-        method === "password-protected" ? state.decodingPassword : undefined
+        method === "password-protected" ? state.decodingPassword : undefined,
+        state.decodingSettings
       );
       updateState({ 
         decodingMethod: method, 
@@ -177,7 +187,26 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
     updateState({ decodingPassword: password });
     
     if (state.currentResult && state.decodingMethod === "password-protected") {
-      const decodingResult = decodeContent(state.currentResult.text, "password-protected", password);
+      const decodingResult = decodeContent(
+        state.currentResult.text, 
+        "password-protected", 
+        password, 
+        state.decodingSettings
+      );
+      updateState({ decodingResult });
+    }
+  };
+
+  const handleSettingsChange = (settings: DecodingSettings) => {
+    updateState({ decodingSettings: settings });
+    
+    if (state.currentResult) {
+      const decodingResult = decodeContent(
+        state.currentResult.text,
+        state.decodingMethod,
+        state.decodingMethod === "password-protected" ? state.decodingPassword : undefined,
+        settings
+      );
       updateState({ decodingResult });
     }
   };
@@ -301,9 +330,21 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
           <div className="space-y-4">
             {/* Decoder Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Метод декодирования:
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Метод декодирования:
+                </label>
+                <Tooltip 
+                  content={
+                    DECODING_OPTIONS.find(opt => opt.id === state.decodingMethod)?.detailedDescription || 
+                    "Выберите метод декодирования"
+                  }
+                >
+                  <button className="text-blue-400 hover:text-blue-300 text-sm ml-2">
+                    ℹ️ Инфо
+                  </button>
+                </Tooltip>
+              </div>
               <select
                 value={state.decodingMethod}
                 onChange={(e) => handleDecodingMethodChange(e.target.value as DecodingMethod)}
@@ -326,6 +367,62 @@ export default function QRScanner({ onScan, onError, className = "" }: QRScanner
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className="w-full p-2 border border-gray-600 rounded text-sm bg-gray-700 text-white placeholder-gray-400"
                   />
+                </div>
+              )}
+
+              {/* Settings for Caesar Cipher */}
+              {state.decodingMethod === "caesar" && (
+                <div className="mt-2 space-y-2">
+                  <label className="block text-xs text-gray-400">
+                    Сдвиг (1-25):
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="range"
+                      min="1"
+                      max="25"
+                      value={state.decodingSettings.caesarShift || 3}
+                      onChange={(e) => handleSettingsChange({
+                        ...state.decodingSettings,
+                        caesarShift: parseInt(e.target.value)
+                      })}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-gray-300 w-8 text-center">
+                      {state.decodingSettings.caesarShift || 3}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Сдвиг {state.decodingSettings.caesarShift || 3}: A→{String.fromCharCode(65 + ((state.decodingSettings.caesarShift || 3) % 26))}
+                  </div>
+                </div>
+              )}
+
+              {/* Settings for ROT Cipher */}
+              {state.decodingMethod === "rot13" && (
+                <div className="mt-2 space-y-2">
+                  <label className="block text-xs text-gray-400">
+                    ROT сдвиг (1-25):
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="range"
+                      min="1"
+                      max="25"
+                      value={state.decodingSettings.rotShift || 13}
+                      onChange={(e) => handleSettingsChange({
+                        ...state.decodingSettings,
+                        rotShift: parseInt(e.target.value)
+                      })}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-gray-300 w-8 text-center">
+                      {state.decodingSettings.rotShift || 13}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    ROT{state.decodingSettings.rotShift || 13}: A→{String.fromCharCode(65 + ((state.decodingSettings.rotShift || 13) % 26))}
+                  </div>
                 </div>
               )}
             </div>
